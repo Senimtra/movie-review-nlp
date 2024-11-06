@@ -1,0 +1,14 @@
+
+# POST http://0.0.0.0:5006/predict HTTP/1.1
+# content-type: application/json
+
+# POST http://127.0.0.1:5000/predict HTTP/1.1
+# content-type: application/json
+
+# {
+#     "review": "The movie was amazing! The acting and storyline were superb."
+# }
+
+# {
+#     "review": "The movie was terrible. The plot was confusing, and the acting was really poor."
+# }
