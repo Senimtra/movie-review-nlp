@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Movie Reviews NLP Binary Classification</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        /* Lighter dark mode background */
+        body {
+            background-color: #1e1e1e;
+            color: #ffffff;
+        }
+        .card {
+            background-color: #2a2a2a;
+            color: #ffffff;
+            border: none;
+        }
+        .form-control {
+            background-color: #3a3a3a;
+            color: #ffffff;
+            border: none;
+        }
+        .attention {
+            background-color: #707070;
+        }
+        .form-control::placeholder {
+            color: #b0b0b0;
+        }
+        .btn-primary {
+            background-color: #6200ea;
+            border-color: #6200ea;
+        }
+        .btn-primary:hover {
+            background-color: #3700b3;
+            border-color: #3700b3;
+        }
+        span {
+            border-radius: 8px;
+        }
+        #sentiment {
+            margin-top: 2em;
+            span {
+                margin-left: 1em;
+            }
+        }
+        #confidence {
+            span {
+                margin-left: 1em;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container mt-5">
+    <div class="row">
+        <!-- Card 1 with Textarea -->
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">Movie Review Text</h5>
+                    <textarea id = "review-input" class="form-control" rows="5" placeholder="Enter your text here..."></textarea>
+                </div>
+            </div>
+        </div>
+
+        <!-- Dummy Card -->
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">Prediction Results</h5>
+                    <p class="card-text">
+                        <div id="attention-result" class="form-control attention"></div>
+                        <p id="sentiment">Review Sentiment:<span id="sentiment-result"></span></p>
+                        <p id="confidence">Confidence Level:<span id="confidence-result"></span></p>
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Button to print to console -->
+    <div class="mt-4 text-center">
+        <button class="btn btn-primary" onclick="getPrediction()">Get Prediction</button>
+    </div>
+</div>
+
+<script>
+    document.getElementById('review-input').innerText = "This is a film about a rat who becomes a chef in Paris. But it's so much more than that. It's about what a great artist can be, where a great artist can come from, it's about food and how to savour it.";
+    const getPrediction = () => {
+    // Set up request
+        const data = {"review": document.getElementById('review-input').value};
+    // Send the POST request
+        // fetch("backend-url/predict", {
+        //     method: "POST",
+        //     headers: {"Content-Type": "application/json"},
+        //     body: JSON.stringify(data)
+        // })
+        // .then(response => response.json())
+        // .then(result => {
+        //     setupAttention(result.token_scores, result.confidence, result.sentiment);
+        //     document.getElementById('sentiment-result').innerText = result.sentiment;
+        //     document.getElementById('confidence-result').innerText = Number(result.confidence.toFixed(2));
+        //     }
+        // )
+    }
+
+    const setupAttention = (scores, confidence, sentiment) => {
+        // console.log(scores);
+        let att_array = [];
+        scores.forEach(item => {att_array.push(item.attention)});
+        att_array = att_array.slice(1, -1);
+        att_array = att_array.map(value => Math.log(value + 1)); // Adding 1 to avoid log(0)
+        let att_min = Math.min(...att_array) + 0.000000001;
+        let att_max = Math.max(...att_array);
+        let normalized_att = att_array.map(value => Math.round(Math.min((value - att_min) * 255) / (att_max - att_min) + 40))
+        normalized_att = normalized_att.map(value => Math.max(0, Math.min(value, 100)));
+        console.log(normalized_att)
+        let token_array = [];
+        scores.forEach(item => {token_array.push(item.token)});
+        token_array = token_array.slice(1, -1);
+        // console.log(token_array);
+        let html_text = "";
+        let green, red;
+        for (let i = 0; i < token_array.length; i++) {
+            let token = token_array[i];
+            if (sentiment == 'positive') {
+                green = normalized_att[i];
+                red = 0;
+            } else {
+                green = 0;
+                red = normalized_att[i];
+            }
+            html_text += `<span style="background-color: rgb(${red}, ${green}, 0);">&nbsp;&nbsp;${token}&nbsp;&nbsp;</span> `;
+            }
+        html_text = `<p>${html_text.trim()}</p>`;
+        document.getElementById('attention-result').innerHTML = html_text;
+        }
+
+    // Wake up backend when the page loads
+    // window.onload = () => navigator.sendBeacon && navigator.sendBeacon("backend-url");
+
+</script>
+
+</body>
+</html>
