@@ -3,9 +3,11 @@ import gc
 import torch
 
 from flask import Flask, request, jsonify
+from flask_cors import CORS
 from transformers import BertTokenizer, BertForSequenceClassification
 
 app = Flask(__name__)
+CORS(app)  # Enable CORS for all routes
 
 # Initialize tokenizer and model with pre-trained weights
 tokenizer = BertTokenizer.from_pretrained('huawei-noah/TinyBERT_General_4L_312D')
